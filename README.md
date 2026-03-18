@@ -18,25 +18,25 @@ The pipeline follows the **Medallion Architecture (Bronze → Silver → Gold)**
   
 - The main objectives of this project are:
   
-- Build a real-time streaming data pipeline using Amazon Kinesis.
+  Build a real-time streaming data pipeline using Amazon Kinesis.
   
-- Implement Medallion Architecture (Bronze, Silver, Gold layers) in Databricks. 
+     - Implement Medallion Architecture (Bronze, Silver, Gold layers) in Databricks. 
 
-- Clean and transform raw IoT sensor data.
+     - Clean and transform raw IoT sensor data.
 
-- Apply anomaly detection techniques using Z-score.
+     - Apply anomaly detection techniques using Z-score.
 
-- Provide real-time dashboards for monitoring sensor health. 
+     - Provide real-time dashboards for monitoring sensor health. 
 
-- Trigger Slack alerts for critical anomalies.
+     - Trigger Slack alerts for critical anomalies.
 
-- This enables proactive monitoring and predictive maintenance.
+     - This enables proactive monitoring and predictive maintenance.
 
 ---
 
 
 
-## 🏗 System Architecture
+## 🏗 LakeHouse Architecture
 
 The pipeline follows a modern Lakehouse Data Engineering Architecture.
 
@@ -88,7 +88,7 @@ s3://iot-sensor-target/YYYY/MM/DD/NN/
 
 ---
 
-## 🏗 Data Pipeline Layers
+## 🏗 ELT Design (Medallion Architecture)
 
 ### 🥉 Bronze Layer – Raw Data Ingestion
 
@@ -135,7 +135,7 @@ s3://iot-sensor-target/YYYY/MM/DD/NN/
 - Prepared data for dashboards  
 - Enabled real-time anomaly tracking  
 
-![star schema](https://github.com/user-attachments/assets/19506dd0-fd22-467c-90e5-dec112b62f8d)
+
 
 
 | Gold Tables |
@@ -146,6 +146,13 @@ s3://iot-sensor-target/YYYY/MM/DD/NN/
 | dim_time |
 | fact_device_monitoring |
 
+---
+
+---
+## Data Models
+
+Star Schema
+![star schema](https://github.com/user-attachments/assets/19506dd0-fd22-467c-90e5-dec112b62f8d)
 ---
 
 ## 📊 Business Insights
@@ -189,12 +196,35 @@ s3://iot-sensor-target/YYYY/MM/DD/NN/
 
 ![Sensor Reading Trend](https://github.com/user-attachments/assets/97979f63-8d54-495b-8052-7e4986995586)
 
-
+---
 
 
 ---
 
-## 🔄 Pipeline Orchestration
+##Data Build Tools(DBT)
+
+- Integrated dbt in the Gold layer to perform advanced transformations on IoT sensor data.
+  
+- Used existing fact and dimension tables (fact_device_monitoring, dim_sensor, dim_location, dim_time) as input sources.
+  
+- Built dbt models to generate insights like device health analysis, anomaly detection, downtime analysis, and critical device monitoring.
+  
+- Created modular SQL models to improve scalability, reusability, and maintainability of the pipeline.
+  
+- Applied data quality tests (like not null, unique) using dbt to ensure accurate and reliable data.
+  
+- Materialized dbt models as tables in Databricks Delta Lake, which are used for dashboards and monitoring.
+
+![DBT_Critical_Devices](https://github.com/user-attachments/assets/ce4c77cb-8a08-405b-afe2-69bb12b1fbc3)
+
+![DBT_Region_wise_Anomolies](https://github.com/user-attachments/assets/b9b7d760-3560-47c9-8733-a4449c288d50)
+
+
+---
+
+
+
+## 🔄 Airflow(Pipeline Orchestration)
 
 The pipeline execution is automated using Apache Airflow and Databricks Workflows.
 
@@ -234,7 +264,6 @@ Workflow tasks include:
 ---
 
 ## 👨‍💻 My Role
-
 Role: Data Engineer (Data Cleaning / Transformation / Validation)
 
 Cleaned and transformed raw IoT data using PySpark
