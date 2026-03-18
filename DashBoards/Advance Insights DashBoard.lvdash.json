@@ -1,0 +1,479 @@
+{
+  "datasets": [
+    {
+      "name": "8d4c1c40",
+      "displayName": "Device Health Metrics and Anomaly Summary Report",
+      "queryLines": [
+        "SELECT\r\n",
+        "DATE(event_timestamp) AS event_date,\r\n",
+        "SUM(CASE \r\n",
+        "        WHEN sensor_status <> 'NORMAL' THEN 1\r\n",
+        "        ELSE 0\r\n",
+        "    END) AS anomaly_count\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "GROUP BY DATE(event_timestamp)\r\n",
+        "ORDER BY event_date;"
+      ]
+    },
+    {
+      "name": "ca0d9235",
+      "displayName": "Top Device Risk Scores and Anomaly Summary Dataset",
+      "queryLines": [
+        "SELECT\r\n",
+        "device_id,\r\n",
+        "AVG(health_score) AS avg_health,\r\n",
+        "SUM(error_count) AS total_errors,\r\n",
+        "SUM(downtime_minutes) AS total_downtime,\r\n",
+        "SUM(CASE \r\n",
+        "        WHEN sensor_status <> 'NORMAL' THEN 1\r\n",
+        "        ELSE 0\r\n",
+        "    END) AS anomaly_count,\r\n",
+        "\r\n",
+        "(\r\n",
+        "    SUM(error_count)*0.4 +\r\n",
+        "    SUM(downtime_minutes)*0.3 +\r\n",
+        "    SUM(CASE \r\n",
+        "            WHEN sensor_status <> 'NORMAL' THEN 1\r\n",
+        "            ELSE 0\r\n",
+        "        END)*0.3\r\n",
+        ") AS device_risk_score\r\n",
+        "\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE health_score IS NOT NULL\r\n",
+        "GROUP BY device_id\r\n",
+        "ORDER BY device_risk_score DESC\r\n",
+        "LIMIT 20;"
+      ]
+    },
+    {
+      "name": "ce3906ca",
+      "displayName": "Critical Sensor Anomaly Insights",
+      "queryLines": [
+        "SELECT\r\n",
+        "device_id,\r\n",
+        "sensor_identifier,\r\n",
+        "reading_value,\r\n",
+        "z_score,\r\n",
+        "region_name\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE sensor_status = 'CRITICAL'\r\n",
+        "ORDER BY z_score DESC\r\n",
+        "LIMIT 20;"
+      ]
+    },
+    {
+      "name": "4f7b4f49",
+      "displayName": "Sensor Status Overview for Device Monitoring",
+      "queryLines": [
+        "SELECT\r\n",
+        "sensor_status,\r\n",
+        "COUNT(*) AS total_devices,\r\n",
+        "ROUND(\r\n",
+        "    COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (),\r\n",
+        "    2\r\n",
+        ") AS percentage\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "GROUP BY sensor_status\r\n",
+        "ORDER BY total_devices DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "ce32d739",
+      "displayName": "Advanced Level DashBoards",
+      "layout": [
+        {
+          "widget": {
+            "name": "anomoly-detection-pattern-by-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "8d4c1c40",
+                  "fields": [
+                    {
+                      "name": "monthly(event_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `event_date`)"
+                    },
+                    {
+                      "name": "sum(anomaly_count)",
+                      "expression": "SUM(`anomaly_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Anomoly Detection Pattern by Time"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(anomaly_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 0,
+            "width": 9,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "device-risk-score",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ca0d9235",
+                  "fields": [
+                    {
+                      "name": "device_id",
+                      "expression": "`device_id`"
+                    },
+                    {
+                      "name": "sum(device_risk_score)",
+                      "expression": "SUM(`device_risk_score`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Device Risk Score"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "device_id",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(device_risk_score)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 11,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "critical",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ce3906ca",
+                  "fields": [
+                    {
+                      "name": "region_name",
+                      "expression": "`region_name`"
+                    },
+                    {
+                      "name": "device_id",
+                      "expression": "`device_id`"
+                    },
+                    {
+                      "name": "sum(z_score)",
+                      "expression": "SUM(`z_score`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Critical Device Monitoring"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "device_id",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(z_score)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "region_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 11,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "sensor-status-distribution",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4f7b4f49",
+                  "fields": [
+                    {
+                      "name": "sensor_status",
+                      "expression": "`sensor_status`"
+                    },
+                    {
+                      "name": "sum(total_devices)",
+                      "expression": "SUM(`total_devices`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Sensor Status Distribution"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sensor_status",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_devices)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sensor_status",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "CRITICAL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "NORMAL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      },
+                      {
+                        "value": "WARNING",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 11,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

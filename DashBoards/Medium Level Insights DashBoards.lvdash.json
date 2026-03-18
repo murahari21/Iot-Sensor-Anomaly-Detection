@@ -1,0 +1,398 @@
+{
+  "datasets": [
+    {
+      "name": "35597ca1",
+      "displayName": "Device Event Counts by Date and Sensor Condition",
+      "queryLines": [
+        "SELECT\r\n",
+        "DATE(event_timestamp) AS event_date,\r\n",
+        "sensor_status,\r\n",
+        "COUNT(*) AS total_events\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "GROUP BY DATE(event_timestamp), sensor_status\r\n",
+        "ORDER BY event_date;"
+      ]
+    },
+    {
+      "name": "32cc4146",
+      "displayName": "Regional IoT Sensor Anomaly Event Summary",
+      "queryLines": [
+        "SELECT\r\n",
+        "region_name,\r\n",
+        "severity_level,\r\n",
+        "COUNT(*) AS total_events\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE region_name IS NOT NULL\r\n",
+        "AND severity_level IS NOT NULL\r\n",
+        "AND region_name <> 'UNKNOWN'\r\n",
+        "AND severity_level <> 'UNKNOWN'\r\n",
+        "GROUP BY region_name, severity_level\r\n",
+        "ORDER BY total_events DESC;"
+      ]
+    },
+    {
+      "name": "868dc461",
+      "displayName": "Device Downtime Analysis by Severity Levels",
+      "queryLines": [
+        "\r\n",
+        "\r\n",
+        "SELECT\r\n",
+        "severity_level,\r\n",
+        "downtime_minutes\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE downtime_minutes IS NOT NULL\r\n",
+        "AND severity_level IS NOT NULL;"
+      ]
+    },
+    {
+      "name": "618eb384",
+      "displayName": "Average Sensor Readings by Network Provider",
+      "queryLines": [
+        "SELECT\r\n",
+        "network_provider,\r\n",
+        "AVG(reading_value) AS avg_sensor_reading\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE network_provider IS NOT NULL\r\n",
+        "GROUP BY network_provider\r\n",
+        "ORDER BY avg_sensor_reading DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "6f7d5735",
+      "displayName": "medium Level DashBoards",
+      "layout": [
+        {
+          "widget": {
+            "name": "sensor-status-trend-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "35597ca1",
+                  "fields": [
+                    {
+                      "name": "sensor_status",
+                      "expression": "`sensor_status`"
+                    },
+                    {
+                      "name": "monthly(event_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `event_date`)"
+                    },
+                    {
+                      "name": "sum(total_events)",
+                      "expression": "SUM(`total_events`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Sensor Status Trend Over Time"
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_events)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sensor_status",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "CRITICAL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "NORMAL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      },
+                      {
+                        "value": "WARNING",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 0,
+            "width": 9,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "b74d40cc",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32cc4146",
+                  "fields": [
+                    {
+                      "name": "severity_level",
+                      "expression": "`severity_level`"
+                    },
+                    {
+                      "name": "region_name",
+                      "expression": "`region_name`"
+                    },
+                    {
+                      "name": "sum(total_events)",
+                      "expression": "SUM(`total_events`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "region_name",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_events)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "severity_level",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 6,
+            "width": 10,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "downtime-vs-severity-level",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "868dc461",
+                  "fields": [
+                    {
+                      "name": "severity_level",
+                      "expression": "`severity_level`"
+                    },
+                    {
+                      "name": "min(downtime_minutes)",
+                      "expression": "MIN(`downtime_minutes`)"
+                    },
+                    {
+                      "name": "q1(downtime_minutes)",
+                      "expression": "PERCENTILE(`downtime_minutes`, 0.25)"
+                    },
+                    {
+                      "name": "median(downtime_minutes)",
+                      "expression": "MEDIAN(`downtime_minutes`)"
+                    },
+                    {
+                      "name": "q3(downtime_minutes)",
+                      "expression": "PERCENTILE(`downtime_minutes`, 0.75)"
+                    },
+                    {
+                      "name": "max(downtime_minutes)",
+                      "expression": "MAX(`downtime_minutes`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "DownTime vs Severity Level"
+              },
+              "widgetType": "box",
+              "encodings": {
+                "x": {
+                  "fieldName": "severity_level",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "whiskerStart": {
+                    "fieldName": "min(downtime_minutes)"
+                  },
+                  "boxStart": {
+                    "fieldName": "q1(downtime_minutes)"
+                  },
+                  "boxMid": {
+                    "fieldName": "median(downtime_minutes)"
+                  },
+                  "boxEnd": {
+                    "fieldName": "q3(downtime_minutes)"
+                  },
+                  "whiskerEnd": {
+                    "fieldName": "max(downtime_minutes)"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 12,
+            "width": 10,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "network-provider-vs-average-sensor-reading",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "618eb384",
+                  "fields": [
+                    {
+                      "name": "network_provider",
+                      "expression": "`network_provider`"
+                    },
+                    {
+                      "name": "sum(avg_sensor_reading)",
+                      "expression": "SUM(`avg_sensor_reading`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Network Provider Vs Average sensor Reading "
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "network_provider",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(avg_sensor_reading)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 18,
+            "width": 10,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

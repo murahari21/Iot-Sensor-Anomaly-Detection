@@ -1,0 +1,559 @@
+{
+  "datasets": [
+    {
+      "name": "594b874b",
+      "displayName": "Total Sensor Monitoring Records Summary",
+      "queryLines": [
+        "SELECT COUNT(*) AS total_sensor_readings\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring;"
+      ]
+    },
+    {
+      "name": "a265c55f",
+      "displayName": "Unique Device Count Summary",
+      "queryLines": [
+        "SELECT COUNT(DISTINCT device_id) AS total_devices\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring;"
+      ]
+    },
+    {
+      "name": "7a6173f7",
+      "displayName": "Critical Alerts Overview Report",
+      "queryLines": [
+        "SELECT COUNT(*) AS total_critical_alerts\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE sensor_status = 'CRITICAL';"
+      ]
+    },
+    {
+      "name": "194b9194",
+      "displayName": "Average Sensor Readings Summary",
+      "queryLines": [
+        "SELECT AVG(reading_value) AS avg_sensor_reading\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring;"
+      ]
+    },
+    {
+      "name": "86fa6e96",
+      "displayName": "Sensor Status Record Summary",
+      "queryLines": [
+        "SELECT\r\n",
+        "sensor_status,\r\n",
+        "COUNT(*) AS total_records\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "GROUP BY sensor_status;"
+      ]
+    },
+    {
+      "name": "ea1a08ba",
+      "displayName": "Daily IoT Sensor Reading Counts Summary",
+      "queryLines": [
+        "SELECT\r\n",
+        "DATE(event_timestamp) AS event_date,\r\n",
+        "COUNT(*) AS total_readings\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "GROUP BY DATE(event_timestamp)\r\n",
+        "ORDER BY event_date;"
+      ]
+    },
+    {
+      "name": "73887ac2",
+      "displayName": "Network Provider Anomaly Overview",
+      "queryLines": [
+        "SELECT\r\n",
+        "COALESCE(network_provider, 'UNKNOWN') AS network_provider,\r\n",
+        "COUNT(*) AS anomaly_count\r\n",
+        "FROM iot_sensor_anomoly_detection.gold.fact_device_monitoring\r\n",
+        "WHERE sensor_status != 'NORMAL'\r\n",
+        "GROUP BY COALESCE(network_provider, 'UNKNOWN')\r\n",
+        "ORDER BY anomaly_count DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "c4b83725",
+      "displayName": "Low Level Dashboards",
+      "layout": [
+        {
+          "widget": {
+            "name": "total-sensor-readings",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "594b874b",
+                  "fields": [
+                    {
+                      "name": "sum(total_sensor_readings)",
+                      "expression": "SUM(`total_sensor_readings`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Sensor Readings"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_sensor_readings)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 5,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "total-devices-monitored",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a265c55f",
+                  "fields": [
+                    {
+                      "name": "sum(total_devices)",
+                      "expression": "SUM(`total_devices`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Devices Monitored"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_devices)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 5,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "total-critical-alerts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7a6173f7",
+                  "fields": [
+                    {
+                      "name": "sum(total_critical_alerts)",
+                      "expression": "SUM(`total_critical_alerts`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Critical Alerts"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_critical_alerts)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 5,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "avg-sensor-reading",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "194b9194",
+                  "fields": [
+                    {
+                      "name": "sum(avg_sensor_reading)",
+                      "expression": "SUM(`avg_sensor_reading`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Average Sensor Reading"
+              },
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(avg_sensor_reading)"
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 5,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "sensor-status-distribution",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "86fa6e96",
+                  "fields": [
+                    {
+                      "name": "countdistinct(sensor_status)",
+                      "expression": "COUNT(DISTINCT `sensor_status`)"
+                    },
+                    {
+                      "name": "sensor_status",
+                      "expression": "`sensor_status`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Sensor Status Distribution"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "countdistinct(sensor_status)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "sensor_status",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "CRITICAL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      },
+                      {
+                        "value": "NORMAL",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 3
+                        }
+                      },
+                      {
+                        "value": "WARNING",
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 2
+                        }
+                      }
+                    ]
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 4,
+            "width": 10,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "sensor-reading-trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ea1a08ba",
+                  "fields": [
+                    {
+                      "name": "monthly(event_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `event_date`)"
+                    },
+                    {
+                      "name": "sum(total_readings)",
+                      "expression": "SUM(`total_readings`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Sensor Reading Trend"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(event_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_readings)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 14,
+            "width": 10,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "network-provider-impact",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "73887ac2",
+                  "fields": [
+                    {
+                      "name": "network_provider",
+                      "expression": "`network_provider`"
+                    },
+                    {
+                      "name": "sum(anomaly_count)",
+                      "expression": "SUM(`anomaly_count`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Network Provider Impact"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "network_provider",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(anomaly_count)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 9,
+            "width": 10,
+            "height": 5
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
