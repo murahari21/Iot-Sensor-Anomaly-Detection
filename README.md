@@ -235,21 +235,25 @@ Workflow tasks include:
 
 ## 👨‍💻 My Role
 
-Role: Data Engineer (Analytics / Testing / Monitoring)
+Role: Data Engineer (Data Cleaning / Transformation / Validation)
 
-- Developed Gold layer analytics tables and implemented anomaly detection logic (Z-score)
-  
-- Created aggregated metrics for device monitoring and real-time dashboards
+Cleaned and transformed raw IoT data using PySpark
 
-- Performed data quality checks across Bronze, Silver, and Gold layers
+Removed nulls, duplicates, and invalid records
 
-- Validated schema, null values, and duplicate records using Pytest
+Standardized schemas and data formats
 
-- Integrated Slack alerts using Webhook API for anomaly and failure notifications
+Performed data validation and quality checks
 
-- Logged pipeline errors and monitored execution for reliability
+Enriched data by joining multiple datasets
 
-- Ensured accuracy of analytics results and supported real-time monitoring
+Applied business rules for analytics readiness
+
+Stored data in Delta Lake tables
+
+Optimized processing for large-scale data
+
+Monitored data quality and logged issues
 
 ---
 
